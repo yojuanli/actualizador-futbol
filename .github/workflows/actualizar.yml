@@ -1,0 +1,31 @@
+name: Actualizar Ligas Automuestreo
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Se ejecuta automáticamente todos los días a las 6:00 AM
+  workflow_dispatch: # Permite forzar la actualización manual con un botón en GitHub
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Clonar Repositorio
+        uses: actions/checkout@v3
+
+      - name: Descargar CSVs de las Ligas
+        run: |
+          mkdir -p data
+          curl -s -H "User-Agent: Mozilla/5.0" "https://www.football-data.co.uk/mmz4281/2526/SP1.csv" -o data/SP1.csv
+          curl -s -H "User-Agent: Mozilla/5.0" "https://www.football-data.co.uk/mmz4281/2526/E0.csv" -o data/E0.csv
+          curl -s -H "User-Agent: Mozilla/5.0" "https://www.football-data.co.uk/mmz4281/2526/D1.csv" -o data/D1.csv
+          curl -s -H "User-Agent: Mozilla/5.0" "https://www.football-data.co.uk/mmz4281/2526/I1.csv" -o data/I1.csv
+          curl -s -H "User-Agent: Mozilla/5.0" "https://www.football-data.co.uk/mmz4281/2526/F1.csv" -o data/F1.csv
+
+      - name: Guardar y Sincronizar en GitHub
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización automática diaria de CSVs" && git push)
