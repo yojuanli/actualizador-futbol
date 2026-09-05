@@ -14,14 +14,14 @@ jobs:
       - name: Clonar Repositorio
         uses: actions/checkout@v3
 
-      - name: Descargar CSVs mediante Proxy Estable
+      - name: Descargar CSVs mediante CodeTabs Proxy
         run: |
           mkdir -p data
-          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/SP1.csv" -o data/SP1.csv
-          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/E0.csv" -o data/E0.csv
-          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/D1.csv" -o data/D1.csv
-          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/I1.csv" -o data/I1.csv
-          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/F1.csv" -o data/F1.csv
+          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/SP1.csv" -o data/SP1.csv
+          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/E0.csv" -o data/E0.csv
+          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/D1.csv" -o data/D1.csv
+          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/I1.csv" -o data/I1.csv
+          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/F1.csv" -o data/F1.csv
 
       - name: Guardar y Sincronizar en GitHub
         run: |
