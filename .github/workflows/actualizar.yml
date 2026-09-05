@@ -14,18 +14,46 @@ jobs:
       - name: Clonar Repositorio
         uses: actions/checkout@v3
 
-      - name: Descargar CSVs mediante CodeTabs Proxy
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar herramientas de suplantación de navegador
+        run: pip install curl_cffi
+
+      - name: Descargar CSVs con huella real de Chrome
         run: |
-          mkdir -p data
-          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/SP1.csv" -o data/SP1.csv
-          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/E0.csv" -o data/E0.csv
-          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/D1.csv" -o data/D1.csv
-          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/I1.csv" -o data/I1.csv
-          curl -s "https://api.codetabs.com/v1/proxy?quest=https://www.football-data.co.uk/mmz4281/2526/F1.csv" -o data/F1.csv
+          python -c "
+          from curl_cffi import requests
+          import os
+
+          os.makedirs('data', exist_ok=True)
+          ligas = {
+              'SP1.csv': 'https://www.football-data.co.uk/mmz4281/2526/SP1.csv',
+              'E0.csv': 'https://www.football-data.co.uk/mmz4281/2526/E0.csv',
+              'D1.csv': 'https://www.football-data.co.uk/mmz4281/2526/D1.csv',
+              'I1.csv': 'https://www.football-data.co.uk/mmz4281/2526/I1.csv',
+              'F1.csv': 'https://www.football-data.co.uk/mmz4281/2526/F1.csv'
+          }
+
+          for filename, url in ligas.items():
+              try:
+                  # impersonate='chrome' burla el filtro de Cloudflare imitando un navegador real
+                  res = requests.get(url, impersonate='chrome', timeout=30)
+                  if res.status_code == 200 and '<html' not in res.text:
+                      with open(f'data/{filename}', 'w', encoding='utf-8') as f:
+                          f.write(res.text)
+                      print(f'Éxito descargando {filename}')
+                  else:
+                      print(f'Error en {filename}: Código HTTP {res.status_code}')
+              except Exception as e:
+                  print(f'Excepción en {filename}: {e}')
+          "
 
       - name: Guardar y Sincronizar en GitHub
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización automática de CSVs limpios" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización definitiva con huella de navegador" && git push)
