@@ -14,14 +14,14 @@ jobs:
       - name: Clonar Repositorio
         uses: actions/checkout@v3
 
-      - name: Descargar CSVs limpios mediante Proxy
+      - name: Descargar CSVs mediante Proxy Estable
         run: |
           mkdir -p data
-          curl -s "https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.football-data.co.uk%2Fmmz4281%2F2526%2FSP1.csv" -o data/SP1.csv
-          curl -s "https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.football-data.co.uk%2Fmmz4281%2F2526%2FE0.csv" -o data/E0.csv
-          curl -s "https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.football-data.co.uk%2Fmmz4281%2F2526%2FD1.csv" -o data/D1.csv
-          curl -s "https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.football-data.co.uk%2Fmmz4281%2F2526%2FI1.csv" -o data/I1.csv
-          curl -s "https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.football-data.co.uk%2Fmmz4281%2F2526%2FF1.csv" -o data/F1.csv
+          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/SP1.csv" -o data/SP1.csv
+          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/E0.csv" -o data/E0.csv
+          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/D1.csv" -o data/D1.csv
+          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/I1.csv" -o data/I1.csv
+          curl -s "https://corsproxy.io/?https://www.football-data.co.uk/mmz4281/2526/F1.csv" -o data/F1.csv
 
       - name: Guardar y Sincronizar en GitHub
         run: |
