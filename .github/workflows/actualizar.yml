@@ -22,7 +22,7 @@ jobs:
       - name: Instalar dependencias
         run: pip install curl_cffi
 
-      - name: Descargar CSVs con navegador simulado
+      - name: Descargar CSVs con validación de seguridad
         run: |
           python -c "
           from curl_cffi import requests
@@ -40,14 +40,15 @@ jobs:
           for filename, url in ligas.items():
               try:
                   res = requests.get(url, impersonate='chrome', timeout=30)
-                  if res.status_code == 200 and '<html' not in res.text and 'error code' not in res.text:
+                  # Validamos que sea un CSV real y no una página de error o HTML
+                  if res.status_code == 200 and 'Div' in res.text and 'HomeTeam' in res.text:
                       with open(f'data/{filename}', 'w', encoding='utf-8') as f:
                           f.write(res.text)
-                      print(f'OK: {filename}')
+                      print(f'✅ Descargado con éxito: {filename}')
                   else:
-                      print(f'Fallo en {filename}: HTTP {res.status_code}')
+                      print(f'⚠️ Servidor de fútbol ocupado o caído para {filename}. Se omite para no corromper datos.')
               except Exception as e:
-                  print(f'Error en {filename}: {e}')
+                  print(f'❌ Error de conexión en {filename}: {e}')
           "
 
       - name: Sincronizar en GitHub
@@ -55,4 +56,4 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización exitosa con Python" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización segura de CSVs" && git push)
