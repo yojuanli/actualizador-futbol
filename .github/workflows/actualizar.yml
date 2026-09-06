@@ -19,35 +19,31 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Instalar dependencias
-        run: pip install curl_cffi
-
-      - name: Descargar CSVs con validación de seguridad
+      - name: Descargar respaldo directo
         run: |
           python -c "
-          from curl_cffi import requests
+          import urllib.request
           import os
 
           os.makedirs('data', exist_ok=True)
-          ligas = {
-              'SP1.csv': 'https://www.football-data.co.uk/mmz4281/2526/SP1.csv',
-              'E0.csv': 'https://www.football-data.co.uk/mmz4281/2526/E0.csv',
-              'D1.csv': 'https://www.football-data.co.uk/mmz4281/2526/D1.csv',
-              'I1.csv': 'https://www.football-data.co.uk/mmz4281/2526/I1.csv',
-              'F1.csv': 'https://www.football-data.co.uk/mmz4281/2526/F1.csv'
-          }
+          url = 'https://www.football-data.co.uk/mmz4281/2526/SP1.csv'
+          
+          req = urllib.request.Request(
+              url, 
+              headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+          )
 
-          for filename, url in ligas.items():
-              try:
-                  res = requests.get(url, impersonate='chrome', timeout=30)
-                  if res.status_code == 200 and 'Div' in res.text and 'HomeTeam' in res.text:
-                      with open(f'data/{filename}', 'w', encoding='utf-8') as f:
-                          f.write(res.text)
-                      print(f'✅ Descargado con éxito: {filename}')
+          try:
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  content = response.read().decode('utf-8')
+                  if 'Div' in content and 'HomeTeam' in content:
+                      with open('data/SP1.csv', 'w', encoding='utf-8') as f:
+                          f.write(content)
+                      print('✅ SP1.csv descargado exitosamente.')
                   else:
-                      print(f'⚠️ Servidor ocupado para {filename}, se omite.')
-              except Exception as e:
-                  print(f'❌ Error en {filename}: {e}')
+                      print('⚠️ El contenido recibido no es válido.')
+          except Exception as e:
+              print(f'❌ El servidor externo sigue bloqueando la conexión: {e}')
           "
 
       - name: Sincronizar en GitHub
@@ -55,4 +51,4 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add data/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización automática de CSVs" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Intento de descarga SP1" && git push)
